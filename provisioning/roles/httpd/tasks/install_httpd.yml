@@ -1,0 +1,46 @@
+---
+# These tasks install http and the php modules.
+
+- name: 'Install httpd'
+  yum:
+    name: httpd
+    state: latest
+
+- name: 'Start and Enable httpd'
+  systemd:
+    name: httpd
+    state: started
+    enabled: yes
+    masked: no
+
+- name: 'Firewalld: Open http'
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: yes
+
+- name: 'DocumentRoot: Permissions'
+  file:
+    path: /var/www/html/
+    owner: root
+    group: apache
+    mode: 'u=rwX,g=rwX,o=rX'
+    setype: httpd_sys_rw_content_t
+    recurse: yes
+
+- name: 'SELinux: Context'
+  sefcontext:
+    target: '/var/www/html(/.*)?'
+    setype: httpd_sys_rw_content_t
+    state: present
+        
+- name: 'Test File: test.php'
+  blockinfile:
+    dest: /var/www/html/test.php
+    block: |
+      <?php
+          phpinfo();
+      ?>
+    create: yes
+    marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->

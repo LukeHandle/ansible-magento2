@@ -1,0 +1,5 @@
+# Exclude vagrant info
+.vagrant
+
+# Exclude Magento Application
+magento-*

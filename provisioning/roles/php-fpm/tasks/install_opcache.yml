@@ -1,0 +1,24 @@
+---
+- name: 'Install Zend OpCache'
+  yum:
+    name: php-pecl-zendopcache
+    state: latest
+  notify: restart php-fpm
+
+- name: 'opcache.memory_consumption'
+  ini_file:
+    dest: /etc/php.d/opcache.ini
+    section: null
+    option: opcache.memory_consumption
+    value: '{{ memory_consumption }}'
+    state: present
+  notify: restart php-fpm
+
+- name: 'opcache.max_accelerated_files'
+  ini_file:
+    dest: /etc/php.d/opcache.ini
+    section: null
+    option: opcache.max_accelerated_files
+    value: '{{ max_accelerated_files }}'
+    state: present
+  notify: restart php-fpm

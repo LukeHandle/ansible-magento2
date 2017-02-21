@@ -1,0 +1,74 @@
+---
+# http://docs.magento.com/m1/ce/user_guide/magento/system-requirements.html
+# -------------------------------------------------------------------------
+# Required extensions:
+#   PDO_MySQL
+#   simplexml
+#   mcrypt
+#   hash
+#   GD
+#   DOM
+#   iconv
+#   curl
+#   SOAP (for Webservices API)
+# Additional configuration:
+#   safe_mode off
+#   memory_limit no less than 256 MB (512 MB recommended)
+
+- name: 'Install PHP dependencies for Magento'
+  yum:
+    name: php-mysql,php-xml,php-xmlrpc,php-mcrypt,php-soap,php-gd,php-pecl-redis
+    state: latest
+  notify: restart php-fpm
+
+# Note that PHP Safe Mode is deprecated in 5.3 and removed in 5.4
+# http://php.net/manual/en/features.safe-mode.php
+
+- name: 'Configure PHP for Magento (memory_limit -> 256M)'
+  ini_file:
+    dest: /etc/php.ini
+    section: PHP
+    option: memory_limit
+    value: 256M
+    state: present
+  notify: restart php-fpm
+
+
+# Magento installation requires this for PHP-FPM, but not mod_PHP
+# Not sure why yet
+# 
+- name: 'Packages: Configure'
+  ini_file:
+    dest: /etc/php.ini
+    section: PHP
+    option: cgi.fix_pathinfo
+    value: 1
+    state: present
+  notify: restart php-fpm
+
+- name: 'Apache AllowOverride for /var/www/html/'
+  template:
+    src: magento.conf.j2
+    dest: /etc/httpd/conf.d/magento.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart httpd
+
+- name: 'Add a magento user'
+  user:
+    name: magento
+    home: /home/magento/
+
+- name: 'Create MySQL database'
+  mysql_db:
+    name: magento
+    state: present
+
+- name: 'Create MySQL user'
+  mysql_user:
+    name: username
+    host: localhost
+    password: password
+    priv: magento.*:ALL
+    state: present

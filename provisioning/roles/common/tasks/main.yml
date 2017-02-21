@@ -1,0 +1,25 @@
+---
+# `policycoreutils-python` required for SELinux tools
+# `MySQL-python` required for Ansible MySQL modules
+- name: 'Packages: Install'
+  yum: name={{ item }} state=latest
+  with_items:
+    - policycoreutils-python
+    - MySQL-python
+
+- name: 'Download IUS'
+  get_url:
+    url: https://centos7.iuscommunity.org/ius-release.rpm
+    dest: /tmp/ius-release.rpm
+
+- name: 'Install IUS'
+  yum:
+    name: /tmp/ius-release.rpm
+    state: present
+
+- name: 'Services: Start and Enable'
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
+    masked: no

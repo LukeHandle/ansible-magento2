@@ -1,0 +1,39 @@
+---
+- name: 'Packages: Install'
+  yum: name={{ item }} state=latest
+  with_items:
+    - mariadb-server
+    - pwgen
+
+- name: 'Services: Start and Enable'
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
+    masked: no
+
+- name: 'MySQL: Generate new root password'
+  command: pwgen -B1ns 24
+  register: mysqlrootpass
+
+- name: 'MySQL: mysql_secure_installation'
+  command: >
+    mysql -e '
+    UPDATE `mysql`.`user` SET `Password`=PASSWORD("{{ mysqlrootpass.stdout }}") WHERE `User`="root";
+    DELETE FROM `mysql`.`user` WHERE User="";
+    DELETE FROM `mysql`.`user` WHERE `User`="root" AND `Host` NOT IN ("localhost", "127.0.0.1", "::1");
+    DROP DATABASE IF EXISTS `test`;
+    DELETE FROM `mysql`.`db` WHERE `Db`="test" OR `Db`="test\\_%";
+    FLUSH PRIVILEGES;
+    '
+- name: 'MySQL: Update /root/.my.cnf'
+  blockinfile:
+    dest: /root/.my.cnf
+    block: |
+      [client]
+      user=root
+      password={{ mysqlrootpass.stdout }}
+    create: yes
+    owner: root
+    group: root
+    mode: 0600

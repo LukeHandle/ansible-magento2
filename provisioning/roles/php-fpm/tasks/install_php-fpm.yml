@@ -1,0 +1,30 @@
+---
+- name: 'Packages: Install'
+  yum:
+    name: php-fpm
+    state: latest
+
+- name: 'Packages: Configure'
+  ini_file:
+    dest: /etc/php.ini
+    section: PHP
+    option: cgi.fix_pathinfo
+    value: 0
+    state: present
+  notify: restart php-fpm
+
+- name: 'Socket: Configure'
+  ini_file:
+    dest: /etc/php-fpm.d/www.conf
+    section: www
+    option: listen
+    value: /run/php-fpm/www.sock
+    state: present
+  notify: restart php-fpm
+
+- name: 'Start and Enable php-fpm'
+  systemd:
+    name: php-fpm
+    state: started
+    enabled: yes
+    masked: no

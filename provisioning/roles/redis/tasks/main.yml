@@ -1,0 +1,23 @@
+---
+- name: 'Install Redis'
+  yum:
+    name: redis30u
+    state: latest
+
+
+# Install and configure Redis 3.0 and php-redis
+#    unixsocket (# -> /tmp/redis.sock)
+#    unixsocketperm (# -> 777)
+#    save (900 1 -> #)
+#    save (300 10 -> #)
+#    save (60 10000 -> #)
+#    maxmemory (# -> 1GB)
+#    maxmemory-policy (# -> allkeys-lru)
+- name: 'Redis: import config'
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis.conf
+    owner: redis
+    group: root
+    mode: 0644
+  notify: restart redis

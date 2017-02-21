@@ -1,0 +1,3 @@
+---
+- include: install_httpd.yml
+- include: configure_httpd_for_php-fpm.yml
