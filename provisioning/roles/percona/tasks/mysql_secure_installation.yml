@@ -39,3 +39,4 @@
     DELETE FROM mysql.db WHERE DB="test" OR DB="test\\_%";
     FLUSH PRIVILEGES;
     '
+  when: mysql_version < 5.7

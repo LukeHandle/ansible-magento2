@@ -15,11 +15,11 @@
     name: varnish
     enabled: yes
 
-#- name: Write Redis configuration
-#  template:
-#    src: redis.conf.j2
-#    dest: /etc/redis.conf
-#    owner: redis
-#    group: root
-#    mode: 0644
-#  notify: Restart Redis
+- name: Write Varnish environment configuration
+  template:
+    src: params.j2
+    dest: /etc/varnish/varnish.params
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Varnish

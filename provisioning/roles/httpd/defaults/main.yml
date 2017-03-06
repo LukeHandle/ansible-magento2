@@ -1,6 +1,6 @@
 ---
 
-httpd_http_port: 80
+httpd_http_port: 8080
 httpd_https_port: 443
 httpd_server_admin: root@localhost
 httpd_server_name: false

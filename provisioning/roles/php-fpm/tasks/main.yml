@@ -40,3 +40,4 @@
     group: root
     mode: 0644
   with_items: phpfpm_pools
+  register: Restart PHP-FPM

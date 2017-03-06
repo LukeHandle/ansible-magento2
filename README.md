@@ -1,6 +1,6 @@
 # Ansible for Magento 2
 
-Some work needed
+Some work needed, debug stuff still dotted around. Devoloped on ANsible 2 which lacks a systemd module. Firewalld needs implementing. Unneeded number of handlers...
 
 ---
 

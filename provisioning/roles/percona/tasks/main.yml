@@ -9,12 +9,24 @@
   include: pwgen.yml
   when: mysql_root_password == ""
 
-- name: Percona Server 5.6
-  include: install_56.yml
-  when: mysql_version == 5.6
+- name: Install Percona Server {{ mysql_version }}
+  yum:
+    name: Percona-Server-server-{{ mysql_version | replace('.', '') }}
+    state: latest
 
-- name: Percona Server 5.7
-  include: install_57.yml
+- name: Start and Enable Percona
+  service:
+    name: mysqld
+    enabled: yes
+    state: started
+
+- name: Grab auto-generated root Percona password
+  command: awk '/temporary password is generated/ {a=$NF} END{print a}' /var/log/mysqld.log
+  register: password_awk
+  when: mysql_version == 5.7
+
+- set_fact:
+    mysql_initial_root_password: "{{ password_awk.stdout }}"
   when: mysql_version == 5.7
 
 - name: Secure MySQL Installation
