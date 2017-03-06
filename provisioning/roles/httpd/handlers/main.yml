@@ -1,5 +1,11 @@
 ---
-- name: 'restart httpd'
-  systemd:
+
+- name: Start Apache
+  service:
+    name: httpd
+    state: started
+    
+- name: Restart Apache
+  service:
     name: httpd
     state: restarted

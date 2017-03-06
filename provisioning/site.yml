@@ -10,9 +10,9 @@
 
   roles:
     - common
-    - mariadb
+    - percona
     - redis
-    - php-fpm
     - httpd
-#    - wordpress
-    - magento
+    - php-fpm
+    - varnish
+#    - magento

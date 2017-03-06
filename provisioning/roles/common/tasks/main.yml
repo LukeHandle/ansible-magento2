@@ -1,25 +1,34 @@
 ---
-# `policycoreutils-python` required for SELinux tools
-# `MySQL-python` required for Ansible MySQL modules
-- name: 'Packages: Install'
-  yum: name={{ item }} state=latest
-  with_items:
-    - policycoreutils-python
-    - MySQL-python
 
-- name: 'Download IUS'
-  get_url:
-    url: https://centos7.iuscommunity.org/ius-release.rpm
-    dest: /tmp/ius-release.rpm
+- name: Display all variables/facts known for a host
+  debug:
+    var: hostvars[inventory_hostname]
 
-- name: 'Install IUS'
+- name: Perform CentOS/RHEL 7 Check
+  fail: msg="Only supported on CentOS/RHEL 7"
+  when: (ansible_distribution != "CentOS" and ansible_distribution != "Red Hat Enterprise Linux") or
+        (ansible_distribution_major_version != "7")
+
+- name: Install EPEL
   yum:
-    name: /tmp/ius-release.rpm
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     state: present
 
-- name: 'Services: Start and Enable'
-  systemd:
-    name: firewalld
-    state: started
-    enabled: yes
-    masked: no
+- name: Install iUS for CentOS
+  yum:
+    name: https://centos7.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: Install iUS for RHEL
+  yum:
+    name: https://rhel7.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ansible_distribution == "Red Hat Enterprise Linux"
+
+#- name: Start and enable Firewalld
+#  systemd:
+#    name: firewalld
+#    state: started
+#    enabled: yes
+#    masked: no

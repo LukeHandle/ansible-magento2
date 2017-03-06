@@ -1,6 +1,10 @@
-# ansible
+# Ansible for Magento 2
 
-I have no idea what I'm doing.
+Some work needed
+
+---
+
+Initally written by Joseph Chapman and here are those instructions for doing stuff here?
 
 ## Method 1: From your local machine, provision a VM
 

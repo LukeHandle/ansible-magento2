@@ -1,1 +1,9 @@
 ---
+
+mysql_version: 5.7
+
+redis_unixsocket: /var/run/redis/redis.sock
+redis_unixsocketperm: 660
+redis_save: false
+redis_maxmemory: 64MB
+redis_maxmemory_policy: allkeys-lru

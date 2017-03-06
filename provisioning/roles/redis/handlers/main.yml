@@ -1,5 +1,11 @@
 ---
-- name: 'restart redis'
-  systemd:
+
+- name: Start Redis
+  service:
+    name: redis
+    state: started
+
+- name: Restart Redis
+  service:
     name: redis
     state: restarted

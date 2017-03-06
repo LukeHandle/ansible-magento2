@@ -1,0 +1,4 @@
+---
+
+varnish_bind: 127.0.0.1
+varnish_port: 6379

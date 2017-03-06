@@ -1,0 +1,11 @@
+---
+
+- name: Start Percona
+  service:
+    name: mysqld
+    state: started
+
+- name: Restart Percona
+  service:
+    name: mysqld
+    state: restarted

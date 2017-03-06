@@ -1,0 +1,41 @@
+---
+
+#- name: Install MySQL Python Module
+#  yum:
+#    name: MySQL-python
+#    state: present
+
+#- name: Change root MySQL password
+#  mysql_user: login_user=root
+#              login_password={{ mysql_initial_root_password }}
+#              check_implicit_admin=yes
+#              name=root
+#              host_all=yes
+#              password={{ mysql_root_password }}
+#              priv=*.*:ALL,GRANT
+
+- name: Set new root Percona password (Pre {{ root_pwgen.stdout }}, Post {{ mysql_root_password }})
+  command: mysql --connect-expired-password --password={{ mysql_initial_root_password }} -e "SET PASSWORD=PASSWORD('{{ mysql_root_password }}')"
+
+- name: Update /root/.my.cnf
+  blockinfile:
+    dest: /root/.my.cnf
+    block: |
+      [client]
+      user=root
+      password='{{ mysql_root_password }}'
+    create: yes
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Disallow remote root MySQL logins, remove anonymous users and drop test databases
+  command: >
+    mysql -e '
+    UPDATE mysql.user SET Password=PASSWORD("{{ mysql_root_password }}") WHERE User="root";
+    DELETE FROM mysql.user WHERE User="root" AND Host NOT IN ("localhost", "127.0.0.1", "::1");
+    DELETE FROM mysql.user WHERE User="";
+    DROP DATABASE IF EXISTS test;
+    DELETE FROM mysql.db WHERE DB="test" OR DB="test\\_%";
+    FLUSH PRIVILEGES;
+    '
