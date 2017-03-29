@@ -1,0 +1,14 @@
+---
+
+- name: apply common configuration to all nodes
+  hosts: all
+  become: yes
+
+  roles:
+    - common
+    - percona
+    - redis
+    - httpd
+    - php-fpm
+    - varnish
+#    - magento

@@ -1,0 +1,35 @@
+---
+
+- name: Install Percona Repository
+  yum:
+    name: http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    state: present
+
+- name: Generate root MySQL password
+  include: pwgen.yml
+  when: mysql_root_password == ""
+
+- name: Install Percona Server {{ mysql_version }}
+  yum:
+    name: Percona-Server-server-{{ mysql_version | replace('.', '') }}
+    state: latest
+
+- name: Start and Enable Percona
+  service:
+    name: mysqld
+    enabled: yes
+    state: started
+
+- name: Grab auto-generated root Percona password
+  command: awk '/temporary password is generated/ {a=$NF} END{print a}' /var/log/mysqld.log
+  register: password_awk
+  when: mysql_version == 5.7
+
+- set_fact:
+    mysql_initial_root_password: "{{ password_awk.stdout }}"
+  when: mysql_version == 5.7
+
+# Add check for whether we have already secured
+
+- name: Secure MySQL Installation
+  include: mysql_secure_installation.yml

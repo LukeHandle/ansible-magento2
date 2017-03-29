@@ -1,0 +1,63 @@
+---
+
+- name: Install Apache 2.4 with mod_ssl
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - httpd
+    - mod_ssl
+
+- name: Enable Apache
+  service:
+    name: httpd
+    enabled: yes
+
+- name: Backup httpd.conf -> .{{ ansible_date_time.iso8601_basic_short }}
+  copy:
+    remote_src: True
+    src: /etc/httpd/conf/httpd.conf
+    dest: /etc/httpd/conf/httpd.conf.{{ ansible_date_time.iso8601_basic_short }}
+
+- name: Backup ssl.conf -> .{{ ansible_date_time.iso8601_basic_short }}
+  copy:
+    remote_src: True
+    src: /etc/httpd/conf.d/ssl.conf
+    dest: /etc/httpd/conf.d/ssl.conf.{{ ansible_date_time.iso8601_basic_short }}
+
+- name: Write main configuration
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Write SSL configuration
+  template:
+    src: ssl.conf.j2
+    dest: /etc/httpd/conf.d/ssl.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Apache
+
+## Event? Extra configs for gzip/security etc. ? Vhost?
+
+- name: Create VHost Config Directory
+  file:
+    path: /etc/httpd/{{ httpd_vhost_conf_folder }}
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Write VHost configurations
+  template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/{{ httpd_vhost_conf_folder }}/{{ item.name }}.conf
+    owner: root
+    group: root
+    mode: 0644
+  with_items: httpd_vhosts
+  register: Restart Apache

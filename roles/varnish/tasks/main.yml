@@ -1,0 +1,34 @@
+---
+
+- name: Install Varnish 4.1 Repository
+  yum:
+    name: https://repo.varnish-cache.org/redhat/varnish-4.1.el7.rpm
+    state: present
+
+- name: Install Varnish 4.1
+  yum:
+    name: varnish
+    state: latest
+
+- name: Enable Varnish
+  service:
+    name: varnish
+    enabled: yes
+
+- name: Write Varnish environment configuration
+  template:
+    src: params.j2
+    dest: /etc/varnish/varnish.params
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Varnish
+
+- name: Write initial Varnish VCL configuration
+  template:
+    src: default.vcl.j2
+    dest: /etc/varnish/default.vcl
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Varnish

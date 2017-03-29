@@ -1,9 +1,0 @@
----
-
-varnish_listen_address:
-varnish_listen_port: 80
-varnish_admin_address: 127.0.0.1
-varnish_admin_port: 6082
-varnish_vcl: /etc/varnish/default.vcl
-varnish_secret: /etc/varnish/secret
-varnish_memory: 256M
