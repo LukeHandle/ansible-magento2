@@ -26,8 +26,9 @@ slowlog = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.slowlog | 
 request_slowlog_timeout = {{ item.slowlog_timeout | default('0') }}
 request_terminate_timeout = {{ item.terminate_timeout | default('0') }}
 catch_workers_output = {{ item.workers_output | default('no') }}
+security.limit_extensions = .php
 
-; error_log must be writable by user/group or process
+; error_log must be writable by user/group of process
 php_admin_flag[log_errors] = {{ item.log_errors | default('on') }}
 php_admin_value[error_log] = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.error_log | default('$pool-error.log') }}
 php_flag[display_errors] = {{ item.display_errors | default('off') }}

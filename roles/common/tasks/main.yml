@@ -6,25 +6,19 @@
 
 - name: Perform CentOS/RHEL 7 Check
   fail: msg="Only supported on CentOS/RHEL 7"
-  when: (ansible_distribution != "CentOS" and ansible_distribution != "Red Hat Enterprise Linux") or
+  when: (ansible_distribution != "CentOS" and ansible_distribution != "RedHat") or
         (ansible_distribution_major_version != "7")
 
-- name: Install EPEL
+- name: Install EPEL and iUS
   yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    name:
+    - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    - "https://{{ {'CentOS': 'centos', 'RedHat': 'rhel'}[ansible_distribution] }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
     state: present
-
-- name: Install iUS for CentOS
-  yum:
-    name: https://centos7.iuscommunity.org/ius-release.rpm
-    state: present
-  when: ansible_distribution == "CentOS"
-
-- name: Install iUS for RHEL
-  yum:
-    name: https://rhel7.iuscommunity.org/ius-release.rpm
-    state: present
-  when: ansible_distribution == "Red Hat Enterprise Linux"
+  register: repo_install
+  until: repo_install.rc == 0
+  retries: 3
+  delay: 5
 
 #- name: Start and enable Firewalld
 #  systemd:

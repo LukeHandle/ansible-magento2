@@ -60,4 +60,4 @@
     group: root
     mode: 0644
   with_items: httpd_vhosts
-  register: Restart Apache
+  notify: Restart Apache

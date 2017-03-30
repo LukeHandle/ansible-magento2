@@ -38,7 +38,6 @@ httpd_vhosts:
    https_proxypass: on
    proxypass_address: http://127.0.0.1:80/
 
-
 phpfpm_pools:
 
   - name: magento
@@ -58,3 +57,7 @@ phpfpm_pools:
     fastcgi_timeout: 905
 
 phpfpm_default_pool: false
+
+phpfpm_opcache_memory_consumption: 256
+phpfpm_opcache_interned_strings_buffer: 16
+phpfpm_opcache_max_accelerated_files: 10000

@@ -1,5 +1,8 @@
 ---
 
+# We could possible take a generic phpfpm_version string and map it to a dict returning the correct package string?
+# eg. 5.4 = "php-fpm", 5.6 = php56u-fpm
+
 - name: Install PHP-FPM 7.0 and modules
   yum:
     name: "{{ item }}"
@@ -25,7 +28,7 @@
 
 - name: Blank www.conf
   copy:
-    content: ; Blanked by Ansible at {{ ansible_date_time.iso8601 }}
+    content: ; Blanked by Ansible at {{ ansible_date_time.iso8601 }}. See original at /etc/php-fpm.d/www.conf.{{ ansible_date_time.iso8601_basic_short }}
     dest: /etc/php-fpm.d/www.conf
     owner: root
     group: root
@@ -54,7 +57,7 @@
     group: root
     mode: 0644
   with_items: phpfpm_pools
-  register: Restart PHP-FPM
+  notify: Restart PHP-FPM
 
 # Check if Apache is installed
 
@@ -65,4 +68,10 @@
     owner: root
     group: root
     mode: 0644
-  register: Restart Apache
+  notify: Restart Apache
+
+# Adjust OpCache check to include other PHP versions?
+
+- name: Configure OpCache
+  include: configure_opcache.yml
+  when: "'php70u-opcache' in phpfpm_install"

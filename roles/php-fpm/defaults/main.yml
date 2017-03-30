@@ -26,6 +26,7 @@ phpfpm_pools:
 
 phpfpm_default_pool: default
 
-# For when OpCache is set to be installed
-phpfpm_opcache_memory_consumption: 32
-phpfpm_opcache_max_accelerated_files: 1000
+# For when OpCache is installed
+phpfpm_opcache_memory_consumption: 128
+phpfpm_opcache_interned_strings_buffer: 8
+phpfpm_opcache_max_accelerated_files: 4000

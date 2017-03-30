@@ -29,7 +29,11 @@
     mysql_initial_root_password: "{{ password_awk.stdout }}"
   when: mysql_version == 5.7
 
-# Add check for whether we have already secured
+- name: Check for .my.cnf (is this a new install)
+  stat:
+    path:  /root/.my.cnf
+  register: local_my_cnf
 
-- name: Secure MySQL Installation
+- name: Secure new MySQL Installations
   include: mysql_secure_installation.yml
+  when: local_my_cnf.stat.exists == False

@@ -1,0 +1,30 @@
+---
+
+# Note: base PHP uses /etc/php.d/opcache.ini instead
+
+- name: 'Set OpCache shared memory'
+  ini_file:
+    dest: /etc/php.d/10-opcache.ini
+    section: null
+    option: opcache.memory_consumption
+    value: '{{ phpfpm_opcache_memory_consumption }}'
+    state: present
+  notify: Restart PHP-FPM
+
+- name: 'Set OpCache strings buffer'
+  ini_file:
+    dest: /etc/php.d/10-opcache.ini
+    section: null
+    option: opcache.interned_strings_buffer
+    value: '{{ phpfpm_opcache_interned_strings_buffer }}'
+    state: present
+  notify: Restart PHP-FPM
+
+- name: 'Set OpCache file limit'
+  ini_file:
+    dest: /etc/php.d/10-opcache.ini
+    section: null
+    option: opcache.max_accelerated_files
+    value: '{{ phpfpm_opcache_max_accelerated_files }}'
+    state: present
+  notify: Restart PHP-FPM
