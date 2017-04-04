@@ -1,0 +1,34 @@
+---
+
+- name: Install pwgen
+  yum:
+    name: pwgen
+    state: present
+  when: item.password is not defined or
+        item.password == ""
+
+- name: Generate 32 character password
+  command: pwgen -y1 32
+  register: mysql_user_pwgen
+  when: item.password is not defined or
+        item.password == ""
+
+- set_fact:
+    mysql_user_password: "{{ mysql_user_pwgen.stdout | replace(\"'\", \"-\") }}"
+  when: item.password is not defined or
+        item.password == ""
+
+- name: Create MySQL database
+  mysql_db:
+    name: "{{ item.database }}"
+    state: present
+  when: item.database != '*'
+
+# Currently this will default "update_password" everytime
+- name: Create MySQL user {{ item.name }} with password {{ mysql_user_password }}
+  mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(mysql_user_password, true) }}"
+    host: "{{ item.host | default(localhost, true) }}"
+    priv: "{{ item.database }}.*:ALL"
+    state: present

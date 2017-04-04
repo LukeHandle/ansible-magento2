@@ -44,9 +44,9 @@
 
 ## Event? Extra configs for gzip/security etc. ? Vhost?
 
-- name: Create VHost Config Directory
+- name: Create VHost config directory
   file:
-    path: /etc/httpd/{{ httpd_vhost_conf_folder }}
+    path: /etc/httpd/{{ httpd_vhosts_conf_folder }}
     state: directory
     owner: root
     group: root
@@ -55,9 +55,20 @@
 - name: Write VHost configurations
   template:
     src: vhost.conf.j2
-    dest: /etc/httpd/{{ httpd_vhost_conf_folder }}/{{ item.name }}.conf
+    dest: /etc/httpd/{{ httpd_vhosts_conf_folder }}/{{ item.name }}.conf
     owner: root
     group: root
     mode: 0644
+  with_items: httpd_vhosts
+  notify: Restart Apache
+
+- name: Create VHost DocumentRoot
+  file:
+    path: "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}"
+    state: directory
+    owner: root
+    group: root
+    recurse: yes
+    mode: 0755
   with_items: httpd_vhosts
   notify: Restart Apache

@@ -16,10 +16,12 @@ pm.process_idle_timeout = 10s
 pm.max_requests = 0
 pm.status_path = /php-fpm-status-$pool
 
-;access.log = /var/log/php-fpm/$pool-access.log
 {% if item.access_log is defined -%}
 access.log = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.access_log }}
-access.format = {{ item.access_format | default('"%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%% %p"') }}
+access.format = {{ item.access_format | default('"%R - %u %t \"%m %{REQUEST_URI}e\" %s %f %{mili}d %{kilo}M %C%% %p"', true) }}
+{% else %}
+;access.log = /var/log/php-fpm/$pool-access.log
+;access.format = {{ item.access_format | default('"%R - %u %t \"%m %{REQUEST_URI}e\" %s %f %{mili}d %{kilo}M %C%% %p"', true) }}
 {% endif %}
 
 slowlog = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.slowlog | default('$pool-slow.log') }}
@@ -32,6 +34,7 @@ security.limit_extensions = .php
 php_admin_flag[log_errors] = {{ item.log_errors | default('on') }}
 php_admin_value[error_log] = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.error_log | default('$pool-error.log') }}
 php_flag[display_errors] = {{ item.display_errors | default('off') }}
+php_admin_value[max_execution_time] = {{ item.max_execution_time | default('30') }}
 php_admin_value[memory_limit] = {{ item.memory_limit | default('256M') }}
 
 ; Set data paths to directories owned by process user

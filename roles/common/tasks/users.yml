@@ -1,0 +1,27 @@
+---
+
+- name: Install pwgen
+  yum:
+    name: pwgen
+    state: present
+  when: item.password is not defined or
+        item.password == ""
+
+- name: Generate 32 character password
+  command: pwgen -y1 32
+  register: common_user_pwgen
+  when: item.password is not defined or
+        item.password == ""
+
+- set_fact:
+    common_user_password: "{{ common_user_pwgen.stdout | replace(\"'\", \"-\") }}"
+  when: item.password is not defined or
+        item.password == ""
+
+# Currently this will default "update_password" everytime
+- name: Create Linux user {{ item.name }} with password {{ item.password | default(common_user_password, true) }}
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | default(omit, true) }}"
+    home: "{{ item.home | default(omit, true) }}"
+    password: "{{ item.password | default(common_user_password, true) | password_hash('sha512') }}"

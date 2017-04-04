@@ -2,11 +2,13 @@
 
 - name: Install Percona Repository
   yum:
-    name: http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    name:
+    - http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    - MySQL-python
     state: present
 
 - name: Generate root MySQL password
-  include: pwgen.yml
+  include: root_pwgen.yml
   when: mysql_root_password == ""
 
 - name: Install Percona Server {{ mysql_version }}
@@ -22,18 +24,23 @@
 
 - name: Grab auto-generated root Percona password
   command: awk '/temporary password is generated/ {a=$NF} END{print a}' /var/log/mysqld.log
-  register: password_awk
+  register: mysql_password_awk
   when: mysql_version == 5.7
 
 - set_fact:
-    mysql_initial_root_password: "{{ password_awk.stdout }}"
+    mysql_initial_root_password: "{{ mysql_password_awk.stdout }}"
   when: mysql_version == 5.7
 
 - name: Check for .my.cnf (is this a new install)
   stat:
     path:  /root/.my.cnf
-  register: local_my_cnf
+  register: mysql_local_my_cnf
 
 - name: Secure new MySQL Installations
   include: mysql_secure_installation.yml
-  when: local_my_cnf.stat.exists == False
+  when: mysql_local_my_cnf.stat.exists == False
+
+- name: Create MySQL users and databases
+  include: users.yml
+  with_items: mysql_users
+  when: mysql_users is defined

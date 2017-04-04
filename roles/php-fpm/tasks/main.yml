@@ -17,14 +17,14 @@
 - name: Check www.conf size
   stat:
     path:  /etc/php-fpm.d/www.conf
-  register: www_conf
+  register: phpfpm_www_conf
 
 - name: Backup www.conf -> .{{ ansible_date_time.iso8601_basic_short }}
   copy:
     remote_src: True
     src: /etc/php-fpm.d/www.conf
     dest: /etc/php-fpm.d/www.conf.{{ ansible_date_time.iso8601_basic_short }}
-  when: www_conf.stat.size > 100
+  when: phpfpm_www_conf.stat.size > 100
 
 - name: Blank www.conf
   copy:
@@ -33,12 +33,12 @@
     owner: root
     group: root
     mode: 0644
-  when: www_conf.stat.size > 100
+  when: phpfpm_www_conf.stat.size > 100
 
 # - name: Check PHP-FPM Log Folder
 #  stat:
 #    path: {{ item.log_folder }}
-#  register: fpm_log_folder
+#  register: phpfpm_log_folder
 #  with_items: phpfpm_pools
 #
 # - name: Create PHP-FPM Log Folder

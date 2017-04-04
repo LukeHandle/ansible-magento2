@@ -1,7 +1,18 @@
 ---
 
+# Version of Percona to install (5.6 or 5.7 currently supported)
 mysql_version: 5.7
 
-# Blank password will trigger auto-generation
+# If the password to the MySQL user is not blank (or grabbed form logfile with Percona 5.7)
 mysql_initial_root_password: ""
+
+# Set root MySQL password to following (blank password will trigger auto-generation)
+# Note: Percona 5.7 has complex requirementents (upper, lower, special)
 mysql_root_password: ""
+
+# Uncommont the following block for adding MySQL users and databases
+#mysql_users:
+#  - name: application_user
+#    password: ""
+#    host: localhost
+#    database: application_db

@@ -10,7 +10,7 @@ DirectoryIndex index.php
 SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
 
 {% for pool in phpfpm_pools -%}
-<Proxy "unix:{{ pool.listen | default('/run/php-fpm/' + pool.name + '.sock') }}|fcgi://{{ pool.name }}/">
+<Proxy "unix:{{ pool.listen | default('/run/php-fpm/' + pool.name + '.sock') }}|fcgi://{{ pool.name }}">
     ProxySet min=0
     ProxySet timeout={{ pool.fastcgi_timeout | default(pool.terminate_timeout) | default('60') }}
 </Proxy>
@@ -18,6 +18,6 @@ SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
 
 {% if phpfpm_default_pool -%}
 <FilesMatch \.php$>
-    SetHandler "proxy:fcgi://{{ phpfpm_default_pool }}/"
+    SetHandler "proxy:fcgi://{{ phpfpm_default_pool }}"
 </FilesMatch>
 {% endif %}

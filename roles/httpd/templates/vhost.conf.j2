@@ -5,18 +5,24 @@
 {% if item.alias is defined %}
     ServerAlias {{ item.alias }}
 {% endif %}
-    DocumentRoot "{{ item.root | default(httpd_vhost_web_folder + '/' + item.name + '/public_html') }}"
+    DocumentRoot "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}"
 
     SetEnvIf X-Forwarded-Proto https HTTPS=on
 
-    <Directory "{{ item.root | default(httpd_vhost_web_folder + '/' + item.name + '/public_html') }}">
+    <Directory "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}">
         AllowOverride All
         Require all granted
     </Directory>
 
+{% if item.phpfpm_pool_admin is defined %}
+    <LocationMatch "{{ item.phpfpm_pool_admin_match }}">
+        SetHandler "proxy:fcgi://{{ item.phpfpm_pool_admin }}"
+    </LocationMatch>
+
+{% endif -%}
 {% if item.phpfpm_pool is defined %}
-    <FilesMatch \.php$>
-        SetHandler "proxy:fcgi://{{ item.phpfpm_pool }}/"
+    <FilesMatch "\.php$">
+        SetHandler "proxy:fcgi://{{ item.phpfpm_pool }}"
     </FilesMatch>
 {% endif -%}
 </VirtualHost>
@@ -27,7 +33,7 @@
 {% if item.alias is defined %}
     ServerAlias {{ item.alias }}
 {% endif %}
-    DocumentRoot "{{ item.root | default(httpd_vhost_web_folder + '/' + item.name + '/public_html') }}"
+    DocumentRoot "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}"
 
 {% if item.https_proxypass is defined %}
     # ProxyPass will default add `X-Forwarded-For`, `X-Forwarded-Host` and `X-Forwarded-Server`
@@ -36,16 +42,16 @@
     RequestHeader set X-Forwarded-Port 443
     ProxyPass / {{ item.proxypass_address | default('http://127.0.0.1:80/') }}
 {% else %}
-    <Directory "{{ item.root | default(httpd_vhost_web_folder + '/' + item.name + '/public_html') }}">
+    <Directory "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}">
         AllowOverride All
         Require all granted
     </Directory>
+{% if item.phpfpm_pool is defined %}
 
-    {% if item.phpfpm_pool is defined -%}
     <FilesMatch \.php$>
         SetHandler "proxy:fcgi://{{ item.phpfpm_pool }}/"
     </FilesMatch>
-    {% endif -%}
+{% endif -%}
 {% endif %}
 
     SSLEngine On

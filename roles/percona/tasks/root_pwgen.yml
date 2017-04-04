@@ -7,8 +7,7 @@
 
 - name: Generate 32 character password
   command: pwgen -y1 32
-  register: root_pwgen
+  register: mysql_root_pwgen
 
 - set_fact:
-    mysql_root_password: "{{ root_pwgen.stdout | replace(\"'\", \"-\") }}"
-
+    mysql_root_password: "{{ mysql_root_pwgen.stdout | replace(\"'\", \"-\") }}"

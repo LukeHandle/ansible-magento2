@@ -14,7 +14,7 @@
 #              password={{ mysql_root_password }}
 #              priv=*.*:ALL,GRANT
 
-- name: Set new root Percona password (Pre {{ root_pwgen.stdout }}, Post {{ mysql_root_password }})
+- name: Set new root Percona password
   command: mysql --connect-expired-password --password={{ mysql_initial_root_password }} -e "SET PASSWORD=PASSWORD('{{ mysql_root_password }}')"
 
 - name: Update /root/.my.cnf
