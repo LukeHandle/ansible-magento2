@@ -18,3 +18,7 @@
     group: root
     mode: 0644
   notify: Restart Redis
+
+- name: Tune system for Redis
+  include: system_tuning.yml
+  when: redis_system_tuning

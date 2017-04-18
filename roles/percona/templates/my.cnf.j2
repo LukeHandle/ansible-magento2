@@ -1,0 +1,105 @@
+[mysqld]
+
+## General
+datadir                              = /var/lib/mysql
+socket                               = /var/lib/mysql/mysql.sock
+pid-file                             = /var/run/mysqld/mysqld.pid
+tmpdir                               = /dev/shm
+
+symbolic-links                       = 0
+#performance-schema                  = OFF
+
+## Cache
+table-definition-cache               = 4096
+table-open-cache                     = 4096
+query-cache-size                     = 64M
+query-cache-type                     = 1
+query-cache-limit                    = 2M
+
+join-buffer-size                    = 2M
+read-buffer-size                    = 2M
+read-rnd-buffer-size                = 8M
+sort-buffer-size                    = 2M
+
+## Temp Tables
+max-heap-table-size                 = 96M
+tmp-table-size                      = 96M
+
+## Networking
+#interactive-timeout                 = 3600
+max-connections                      = 500
+max-user-connections                 = 400
+
+max-connect-errors                   = 1000000
+max-allowed-packet                   = 256M
+slave-net-timeout                    = 60
+skip-name-resolve
+wait-timeout                         = 600
+
+## MyISAM
+key-buffer-size                      = 32M
+#myisam-recover                      = FORCE,BACKUP
+myisam-sort-buffer-size              = 256M
+
+## InnoDB
+#innodb-autoinc-lock-mode            = 2
+innodb-buffer-pool-size              = {{ mysql_innodb_buffer }}
+#innodb-file-format                  = Barracuda
+innodb-file-per-table                = 1
+innodb-log-file-size                 = 200M
+
+#innodb-flush-method                 = O_DIRECT
+#innodb-large-prefix                 = 0
+#innodb-lru-scan-depth               = 1000
+#innodb-io-capacity                  = 1000
+innodb-purge-threads                 = 4
+innodb-thread-concurrency            = 32
+innodb_lock_wait_timeout             = 300
+
+optimizer_switch                     = 'use_index_extensions=off'
+transaction_isolation                = 'READ-COMMITTED'
+
+## Replication and PITR
+#auto-increment-increment            = 2
+#auto-increment-offset               = 1
+#binlog-format                       = MIXED
+#expire-logs-days                     = 5
+#log-bin                             = /var/log/mysql/bin-log
+#log-slave-updates                   = 1
+#max-binlog-size                      = 128M
+#read-only                           = 1
+#relay-log                            = /var/log/mysql/relay-log
+#relay-log-space-limit                = 16G
+#server-id                            = 1
+#slave-compressed-protocol           = 1
+#slave-sql-verify-checksum           = 1
+#sync-binlog                         = 1
+#sync-master-info                    = 1
+#sync-relay-log                      = 1
+#sync-relay-log-info                 = 1
+
+## Logging
+log-error                            = /var/log/mysqld.log
+log-output                           = FILE
+log-slow-admin-statements
+log-slow-slave-statements
+#log-warnings                        = 0
+long-query-time                      = 4
+slow-query-log                       = 1
+slow-query-log-file                  = /var/lib/mysqllogs/slow-log
+
+## SSL
+#ssl-ca                              = /etc/mysql-ssl/ca-cert.pem
+#ssl-cert                            = /etc/mysql-ssl/server-cert.pem
+#ssl-key                             = /etc/mysql-ssl/server-key.pem
+
+[mysqld_safe]
+pid-file                             = /var/run/mysqld/mysqld.pid
+#socket                               = /var/run/mysqld/mysqld.sock
+nice                                 = 0
+
+#malloc-lib                          = /usr/lib64/libjemalloc.so.1
+open-files-limit                     = 65535
+
+[mysql]
+no-auto-rehash

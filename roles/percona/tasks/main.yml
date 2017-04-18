@@ -1,11 +1,17 @@
 ---
 
+- name: Install Percona GPG Key
+  rpm_key:
+    key: https://www.percona.com/downloads/percona-release/RPM-GPG-KEY-percona
+    state: present
+
 - name: Install Percona Repository
   yum:
     name:
     - http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-    - MySQL-python
     state: present
+  when: rhn is not defined or
+        not rhn
 
 - name: Generate root MySQL password
   include: root_pwgen.yml
@@ -13,10 +19,28 @@
 
 - name: Install Percona Server {{ mysql_version }}
   yum:
-    name: Percona-Server-server-{{ mysql_version | replace('.', '') }}
+    name:
+    - Percona-Server-server-{{ mysql_version | replace('.', '') }}
+    - MySQL-python
     state: latest
 
-- name: Start and Enable Percona
+- name: Backup my.cnf -> .{{ ansible_date_time.iso8601_basic_short }}
+  copy:
+    remote_src: True
+    src: /etc/my.cnf
+    dest: /etc/my.cnf.{{ ansible_date_time.iso8601_basic_short }}
+  when: mysql_modified_cnf
+
+- name: Write main configuration
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: mysql_modified_cnf
+
+- name: Start and Enable Percona Server
   service:
     name: mysqld
     enabled: yes

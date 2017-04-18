@@ -3,11 +3,13 @@
 # We could possible take a generic phpfpm_version string and map it to a dict returning the correct package string?
 # eg. 5.4 = "php-fpm", 5.6 = php56u-fpm
 
-- name: Install PHP-FPM 7.0 and modules
+- name: Install PHP-FPM
   yum:
     name: "{{ item }}"
     state: latest
-  with_items: phpfpm_install
+  with_flattened:
+    - phpfpm_install
+    - "python-httplib2"
 
 - name: Enable PHP-FPM
   service:
@@ -75,3 +77,17 @@
 - name: Configure OpCache
   include: configure_opcache.yml
   when: "'php70u-opcache' in phpfpm_install"
+
+- name: Set php.ini options
+  ini_file:
+    dest: /etc/php.ini
+    section: PHP
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  with_dict: php_fpm_ini_options
+  notify: Restart PHP-FPM
+
+- name: Install Composer
+  include: composer_install.yml
+  when: php_fpm_composer

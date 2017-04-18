@@ -9,3 +9,6 @@
   service:
     name: redis
     state: restarted
+
+- name: Reload Systemd
+  command: /usr/bin/systemctl daemon-reload

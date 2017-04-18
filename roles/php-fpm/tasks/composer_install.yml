@@ -1,0 +1,17 @@
+---
+
+- name: Get Composer installer SHA384 hash
+  uri:
+    url: https://composer.github.io/installer.sig
+    return_content: true
+  register: php_fpm_composer_hash
+
+- name: Download Composer installer
+  get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-installer.php
+    mode: 0750
+    checksum: "sha384:{{ php_fpm_composer_hash.content | replace('\n', '') }}"
+
+- name: Run Composer installer
+  command: /usr/bin/php /tmp/composer-installer.php --install-dir=/usr/local/bin/ --filename=composer

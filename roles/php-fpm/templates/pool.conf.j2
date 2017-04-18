@@ -34,8 +34,6 @@ security.limit_extensions = .php
 php_admin_flag[log_errors] = {{ item.log_errors | default('on') }}
 php_admin_value[error_log] = {{ item.log_folder | default('/var/log/php-fpm/') }}{{ item.error_log | default('$pool-error.log') }}
 php_flag[display_errors] = {{ item.display_errors | default('off') }}
-php_admin_value[max_execution_time] = {{ item.max_execution_time | default('30') }}
-php_admin_value[memory_limit] = {{ item.memory_limit | default('256M') }}
 
 ; Set data paths to directories owned by process user
 php_value[session.save_handler] = files

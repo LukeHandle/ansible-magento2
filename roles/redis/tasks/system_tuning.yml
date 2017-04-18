@@ -1,0 +1,36 @@
+---
+
+- name: Create transparent hugepage fix Redis service
+  blockinfile:
+    dest: /etc/systemd/system/redis-hugepage-fix.service
+    create: yes
+    content: |
+      # Created by Ansible at {{ ansible_date_time.iso8601 }}
+      [Unit]
+      Description=Disable Transparent Hugepage before Redis starts
+      Before=redis.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/bash -c 'if [[ -f /sys/kernel/mm/transparent_hugepage/enabled ]]; then echo never > /sys/kernel/mm/transparent_hugepage/enabled; fi'
+
+      [Install]
+      RequiredBy=redis.service
+  notify: Reload Systemd
+
+- name: Enable transparent hugepage fix Redis service
+  service:
+    name: redis-hugepage-fix
+    enabled: yes
+
+- name: Allow Redis to fork() RDB save even without full memory allocation
+  sysctl:
+    name: vm.overcommit_memory
+    value: 1
+    state: present
+
+- name: Allow Redis to utilize a larger socket backlog
+  sysctl:
+    name: net.core.somaxconn
+    value: 5120
+    state: present

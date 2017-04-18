@@ -33,3 +33,5 @@
       with_items:
         - http
         - https
+      when: firewall is not defined or
+            firewall

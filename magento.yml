@@ -8,6 +8,9 @@ magento_root: "/var/www/vhosts/{{ magento_site }}/public_html/"
 
 ##
 
+firewall: true
+rhn: false
+
 common_users:
 
   - name: "{{ magento_user }}"
@@ -20,6 +23,10 @@ mysql_users:
   - name: "{{ magento_user }}"
     host: localhost
     database: "{{ magento_user }}_db"
+
+mysql_modified_cnf: true
+mysql_innodb_buffer: 256M
+
 
 ##
 
@@ -35,9 +42,9 @@ httpd_vhosts:
 
  - name: "{{ magento_site }}"
    alias: "www.{{ magento_site }}"
-   phpfpm_pool: "{{ magento_user }}_admin"
-   phpfpm_pool_admin: "{{ magento_user }}_admin"
-   phpfpm_pool_admin_match: '^/(setup|admin_)/(.*)\.php$'
+   phpfpm_pool: "{{ magento_user }}"
+   #phpfpm_pool_admin: "{{ magento_user }}_admin"
+   #phpfpm_pool_admin_match: '^/(setup|admin_)/(.*)\.php$'
    https: on
    https_proxypass: on
    proxypass_address: http://127.0.0.1:80/
@@ -61,22 +68,22 @@ phpfpm_install:
 
 phpfpm_pools:
 
+#  - name: "{{ magento_user }}"
+#    process_user: "{{ magento_user }}"
+#    process_group: "{{ magento_group }}"
+#    listen_owner: root
+#    listen_group: apache
+#    slowlog_timeout: 15
+#    terminate_timeout: 35
+#    fastcgi_timeout: 35
+
+#  - name: "{{ magento_user }}_admin"
   - name: "{{ magento_user }}"
     process_user: "{{ magento_user }}"
     process_group: "{{ magento_group }}"
     listen_owner: root
     listen_group: apache
-    slowlog_timeout: 15
-    terminate_timeout: 35
-    fastcgi_timeout: 35
-
-  - name: "{{ magento_user }}_admin"
-    process_user: "{{ magento_user }}"
-    process_group: "{{ magento_group }}"
-    listen_owner: root
-    listen_group: apache
     slowlog_timeout: 600
-    max_execution_time: 900
     terminate_timeout: 905
     fastcgi_timeout: 905
 
@@ -85,3 +92,12 @@ phpfpm_default_pool: false
 phpfpm_opcache_memory_consumption: 256
 phpfpm_opcache_interned_strings_buffer: 16
 phpfpm_opcache_max_accelerated_files: 10000
+
+php_fpm_ini_options:
+  expose_php: "Off"
+  max_execution_time: 300
+  memory_limit: 768M
+  realpath_cache_size: 128k
+  realpath_cache_ttl: 7200
+
+php_fpm_composer: true

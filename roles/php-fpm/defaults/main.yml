@@ -30,3 +30,12 @@ phpfpm_default_pool: default
 phpfpm_opcache_memory_consumption: 128
 phpfpm_opcache_interned_strings_buffer: 8
 phpfpm_opcache_max_accelerated_files: 4000
+
+php_fpm_ini_options:
+  expose_php: "On"
+  max_execution_time: 30
+  memory_limit: 128M
+  realpath_cache_size: 16k
+  realpath_cache_ttl: 120
+
+php_fpm_composer: false
