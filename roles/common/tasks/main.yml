@@ -14,8 +14,18 @@
     name: firewalld
     enabled: yes
     state: started
-  when: firewall is not defined or
-        firewall
+  when: firewall
+
+- name: Open HTTP/S in firewalld
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: yes
+    state: enabled
+  with_items:
+    - http
+    - https
+  when: firewall
 
 - name: Install EPEL and iUS
   yum:
@@ -27,8 +37,7 @@
   until: common_repo_install.rc == 0
   retries: 3
   delay: 5
-  when: rhn is not defined or
-        not rhn
+  when: not rhn
 
 - name: Create Linux users
   include: users.yml

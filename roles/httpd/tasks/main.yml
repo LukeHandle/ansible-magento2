@@ -42,7 +42,17 @@
     mode: 0644
   notify: Restart Apache
 
-## Event? Extra configs for gzip/security etc. ? Vhost?
+- name: Write GZip configuration
+  template:
+    src: gzip.conf.j2
+    dest: /etc/httpd/conf.d/gzip.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: httpd_gzip
+  notify: Restart Apache
+
+## Event? Extra configs for security etc. ? Vhost?
 
 - name: Create VHost config directory
   file:

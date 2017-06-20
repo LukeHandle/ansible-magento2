@@ -4,7 +4,7 @@
   hosts: all
   become: yes
   vars_files:
-    - magento.yml
+    - defaults.yml
 
   roles:
     - common
@@ -13,25 +13,9 @@
     - httpd
     - php-fpm
     - varnish
+    - magento
 
-  tasks:
-    - name: "Unarchive to {{ magento_root }}"
-      unarchive:
-        src: "{{ magento_archive }}"
-        dest: "{{ magento_root }}"
-        owner:  "{{ magento_user }}"
-        group: "{{ magento_group }}"
-        copy: no
-      when: magento_archive is defined
-
-    - name: Open HTTP/S in firewalld
-      firewalld:
-        service: "{{ item }}"
-        permanent: true
-        immediate: yes
-        state: enabled
-      with_items:
-        - http
-        - https
-      when: firewall is not defined or
-            firewall
+#  tasks:
+#    - name: Display all variables/facts known for a host
+#      debug:
+#        var: hostvars[inventory_hostname]

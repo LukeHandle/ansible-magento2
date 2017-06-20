@@ -1,0 +1,35 @@
+---
+
+magento_cron:
+# Requires Ansible 2.1 to insert cron env
+#  MAGENTO - Reindexing, e-mails, newsletters, generate sitemap: "/bin/php ${MAGENTO_ROOT}/bin/magento cron:run | grep -v 'Ran jobs by schedule' >> ${MAGENTO_ROOT}/var/log/magento.cron.log"
+#  MAGENTO - Jobs scheduled by setup: "/bin/php ${MAGENTO_ROOT}/bin/magento setup:cron:run >> ${MAGENTO_ROOT}/var/log/setup.cron.log"
+#  MAGENTO - Component manager: "/bin/php ${MAGENTO_ROOT}/update/cron.php >> ${MAGENTO_ROOT}/var/log/update.cron.log"
+
+  MAGENTO - Reindexing, e-mails, newsletters, generate sitemap: "/bin/php {{ magento_root }}/bin/magento cron:run | grep -v 'Ran jobs by schedule' >> {{ magento_root }}/var/log/magento.cron.log"
+  MAGENTO - Jobs scheduled by setup: "/bin/php {{ magento_root }}/bin/magento setup:cron:run >> {{ magento_root }}/var/log/setup.cron.log"
+  MAGENTO - Component manager: "/bin/php {{ magento_root }}/update/cron.php >> {{ magento_root }}/var/log/update.cron.log"
+
+# Todo: Fix magento_db_pass to use the password from teh correct user (set it fully in MySQL role)
+magento_install_cmd: " \
+  /bin/php {{ magento_root }}/bin/magento setup:install \
+  --db-user={{ magento_db_user }} \
+  --db-password=\'{{ magento_db_pass | default(mysql_user_password, true) }}\' \
+  --db-name={{ magento_db_name }} \
+  --db-host={{ magento_db_host }} \
+  {{ '' if magento_cache_hosts is equalto '' else '--http-cache-hosts=' + magento_cache_hosts }} \
+  --language={{ magento_language }} \
+  --timezone={{ magento_timezone }} \
+  --currency={{ magento_currency }} \
+  --use-rewrites={{ 1 if magento_use_rewrites else 0 }} \
+  --base-url={{ magento_base_url }} \
+  --use-secure={{ 1 if magento_use_secure else 0 }} \
+  --base-url-secure={{ magento_base_url_secure }} \
+  --use-secure-admin={{ 1 if magento_use_secure_admin else 0 }} \
+  {{ '' if magento_backend_frontname is equalto '' else '--backend-frontname=' + magento_backend_frontname }} \
+  --admin-user={{ magento_admin_user }} \
+  --admin-password={{ magento_admin_pass }} \
+  --admin-email={{ magento_admin_email }} \
+  --admin-firstname={{ magento_admin_firstname }} \
+  --admin-lastname={{ magento_admin_lastname }} \
+  {{ '--use-sample-data' if magento_sample_data else '' }}"

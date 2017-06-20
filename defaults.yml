@@ -1,0 +1,129 @@
+---
+
+magento_os_user: magento
+magento_os_group: php-fpm
+magento_site: example.com
+magento_version: 2
+
+magento_root: "/var/www/vhosts/{{ magento_site }}/public_html"
+
+magento_db_user: "{{ magento_os_user }}"
+magento_db_pass: ""
+magento_db_name: "{{ magento_os_user }}_db"
+magento_db_host: localhost
+
+magento_use_rewrites: true
+magento_use_secure: true
+magento_use_secure_admin: true
+magento_base_url: "http://{{ ansible_default_ipv4.address }}/"
+magento_base_url_secure: "https://{{ ansible_default_ipv4.address }}/"
+magento_backend_frontname: ""
+magento_cache_hosts: 127.0.0.1
+
+magento_admin_user: admin
+magento_admin_pass: "{{ ansible_default_ipv4.address }}_admin"
+magento_admin_email: admin@example.com
+magento_admin_firstname: Firstname
+magento_admin_lastname: Lastname
+
+magento_language: en_GB
+magento_timezone: Europe/London
+magento_currency: GBP
+
+# Install requires a magento_archive file
+magento_install: false
+magento_sample_data: true
+
+##
+
+common_users:
+
+  - name: "{{ magento_os_user }}"
+
+##
+
+mysql_version: 5.7
+mysql_users:
+
+  - name: "{{ magento_db_user }}"
+    host: localhost
+    database: "{{ magento_db_name }}"
+    password: "{{ magento_db_pass}}"
+
+mysql_modified_cnf: true
+mysql_innodb_buffer: 256M
+
+
+##
+
+redis_unixsocket: /var/run/redis/redis.sock
+redis_unixsocketperm: 660
+redis_save: false
+redis_maxmemory: 1G
+redis_maxmemory_policy: allkeys-lru
+
+##
+
+httpd_http_port: 8080
+httpd_vhosts:
+
+ - name: "{{ magento_site }}"
+   alias: "www.{{ magento_site }} {{ ansible_default_ipv4.address }}"
+   phpfpm_pool: "{{ magento_os_user }}"
+   phpfpm_pool_admin: "{{ magento_os_user }}_admin"
+   phpfpm_pool_admin_match: "/setup/index.php"
+   https: on
+   https_proxypass: on
+   proxypass_address: http://127.0.0.1:80/
+
+##
+
+phpfpm_install:
+  - php70u-cli
+  - php70u-fpm
+  - php70u-mysqlnd
+  - php70u-opcache
+  - php70u-xml
+  - php70u-mcrypt
+  - php70u-gd
+  - php70u-devel
+  - php70u-intl
+  - php70u-mbstring
+  - php70u-bcmath
+  - php70u-json
+  - php70u-pecl-redis
+
+phpfpm_pools:
+
+  - name: "{{ magento_os_user }}"
+    process_user: "{{ magento_os_user }}"
+    process_group: "{{ magento_os_group }}"
+    listen_owner: root
+    listen_group: apache
+    slowlog_timeout: 15
+    terminate_timeout: 35
+    fastcgi_timeout: 35
+
+  - name: "{{ magento_os_user }}_admin"
+    process_user: "{{ magento_os_user }}"
+    process_group: "{{ magento_os_group }}"
+    listen_owner: root
+    listen_group: apache
+    slowlog_timeout: 600
+    terminate_timeout: 905
+    fastcgi_timeout: 905
+
+phpfpm_default_pool: false
+
+phpfpm_opcache_memory_consumption: 256
+phpfpm_opcache_interned_strings_buffer: 16
+phpfpm_opcache_max_accelerated_files: 10000
+
+php_fpm_ini_options:
+  expose_php: "Off"
+  max_execution_time: 30
+  memory_limit: 768M
+  realpath_cache_size: 128k
+  realpath_cache_ttl: 7200
+
+php_fpm_composer: true

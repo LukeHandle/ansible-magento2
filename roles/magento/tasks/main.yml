@@ -1,0 +1,37 @@
+---
+
+- name: Load Magento version specific variables
+  include_vars: magento{{ magento_version }}.yml
+
+- name: "Unarchive to {{ magento_root }}"
+  unarchive:
+    src: "{{ magento_archive }}"
+    dest: "{{ magento_root }}/"
+    owner:  "{{ magento_os_user }}"
+    group: "{{ magento_os_group }}"
+    copy: no
+  when: magento_archive is defined
+
+# Requires Ansible 2.1 to insert cron env
+#- name: Set MAGENTO_ROOT env in {{ magento_user }} crontab
+#  cron:
+#    name: MAGENTO_ROOT
+#    env: yes
+#    value: "{{ magento_root }}"
+#    user: "{{ magento_user }}"
+
+- name: Adding jobs to {{ magento_os_user }} crontab
+  cron:
+    name: "{{ item.key }}"
+    job: "{{ item.value }}"
+    minute: "*/5"
+    user: "{{ magento_os_user }}"
+  with_dict: magento_cron
+
+- name: Run Magento {{ magento_version }} install
+  command: "{{ magento_install_cmd }}"
+  become: true
+  become_method: su
+  become_user: "{{ magento_os_user }}"
+  register: magento_install_output
+  when: magento_install
