@@ -57,7 +57,7 @@ mysql_innodb_buffer: 256M
 ##
 
 redis_unixsocket: /var/run/redis/redis.sock
-redis_unixsocketperm: 660
+redis_unixsocketperm: 666
 redis_save: false
 redis_maxmemory: 1G
 redis_maxmemory_policy: allkeys-lru

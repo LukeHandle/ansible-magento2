@@ -89,5 +89,16 @@
   notify: Restart PHP-FPM
 
 - name: Install Composer
-  include: composer_install.yml
+  yum:
+    name: "{{ item }}"
+    state: latest
   when: php_fpm_composer
+  with_items:
+    - php70u-cli
+    - php70u-common
+    - php70u-gd
+    - php70u-intl
+    - php70u-mbstring
+    - php70u-pdo
+    - php70u-process
+    - composer

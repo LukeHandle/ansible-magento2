@@ -31,7 +31,7 @@
   yum:
     name:
     - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-    - "https://{{ {'CentOS': 'centos', 'RedHat': 'rhel'}[ansible_distribution] }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
+    - "https://{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
     state: present
   register: common_repo_install
   until: common_repo_install.rc == 0
