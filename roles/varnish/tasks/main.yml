@@ -1,11 +1,22 @@
 ---
 
-- name: Install Varnish 4.1 Repository
+- name: Ensure Varnish repo dependencies are installed
   yum:
-    name: https://repo.varnish-cache.org/redhat/varnish-4.1.el7.rpm
+    name: "{{ item }}"
     state: present
+  with_items:
+    - yum-utils
+    - pygpgme
 
-- name: Install Varnish 4.1
+- name: Add Varnish packagecloud.io repo
+  template:
+    src: varnish.repo.j2
+    dest: /etc/yum.repos.d/varnish.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install Varnish
   yum:
     name: varnish
     state: latest
