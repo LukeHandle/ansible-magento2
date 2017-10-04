@@ -1,31 +1,52 @@
 ---
 
-httpd_http_port: 80
-httpd_https_port: 443
-httpd_server_admin: root@localhost
+httpd_server_admin: "root@localhost"
 httpd_server_name: false
 httpd_gzip: true
 
-httpd_https_protocol: all -SSLv3 -TLSv1 -TLSv1.1
-httpd_https_ciphers: ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256
+httpd_https_protocol: "all -SSLv3 -TLSv1 -TLSv1.1"
+httpd_https_ciphers: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
 
-httpd_vhosts_conf_folder: vhost.d
-httpd_vhosts_web_folder: /var/www/vhosts
+httpd_vhost_template: "vhost.conf.j2"
+httpd_vhosts_conf_folder: "vhost.d"
+httpd_vhosts_web_folder: "/var/www/vhosts"
+httpd_log_format: "combined"
+httpd_allow_override: "All"
+httpd_options: "-Indexes +FollowSymLinks"
 
 httpd_vhosts:
 
- - name: 00-default-site
-   address: _default_
-   root: /var/www/html
-   https: on
+  # Minimium (defaults commented)
+  - servername: "stub.example.com"
+    state: present
+    #address: "*"
+    http_port: 80
+    #docroot: "{{ httpd_vhosts_web_folder }}/example.com/public_html"
+    #allow_override: "{{ httpd_allow_override }}"
+    #options: "{{ httpd_options }}"
 
- - address: '*'
-   name: example.com
-   alias: www.example.com www1.example.com
-   root: "{{ httpd_vhosts_web_folder }}/example/public_html"
-   phpfpm_pool: default
-   https: on
-   https_cert: /etc/pki/tls/certs/localhost.crt
-   https_key: /etc/pki/tls/private/localhost.key
-   https_proxypass: on
-   proxypass_address: http://127.0.0.1:80/
+  # All options shown
+  - filename: "example.com-frontend"
+    state: present
+    template: "{{ httpd_vhost_template }}"
+    address: "*"
+    http_port: 80
+    https_port: 443
+    servername: "example.com"
+    serveralias:  "www.example.com cdn.example.com"
+    alias_redirect: true
+    error_log: "logs/example.com-error.log"
+    access_log: "logs/example.com-access.log"
+    access_log_format: "combined"
+    https_cert: "/etc/pki/tls/certs/localhost.crt"
+    https_key: "/etc/pki/tls/private/localhost.key"
+    https_ca: null
+    docroot: "{{ httpd_vhosts_web_folder }}/example/public_html"
+    index: "index.php index.html"
+    allow_override: "All"
+    options: "-Indexes +FollowSymLinks"
+    extra_parameters: |
+      #comment
+    redirect: "permanent /store/ https://other.example.com/"
+    proxypass: "/blog/ http://127.0.0.1:6081/"
+    phpfpm: "default"

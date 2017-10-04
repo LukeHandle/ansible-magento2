@@ -9,5 +9,6 @@
   command: pwgen -y1 32
   register: mysql_root_pwgen
 
-- set_fact:
+- name: Set password variable
+  set_fact:
     mysql_root_password: "{{ mysql_root_pwgen.stdout | replace(\"'\", \"-\") }}"

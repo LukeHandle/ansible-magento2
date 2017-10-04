@@ -12,7 +12,7 @@ mysql_root_password: ""
 
 # Rough cut non-default my.cnf
 mysql_modified_cnf: false
-mysql_innodb_buffer: 128M
+mysql_innodb_buffer: "128M"
 
 # Uncommont the following block for adding MySQL users and databases
 #mysql_users:

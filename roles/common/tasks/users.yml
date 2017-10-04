@@ -13,7 +13,8 @@
   when: item.password is not defined or
         item.password == ""
 
-- set_fact:
+- name: Set password variable
+  set_fact:
     common_user_password: "{{ common_user_pwgen.stdout | replace(\"'\", \"-\") }}"
   when: item.password is not defined or
         item.password == ""

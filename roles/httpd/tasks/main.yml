@@ -1,5 +1,11 @@
 ---
 
+
+- name: Create lists of HTTP/S ports
+  set_fact:
+    httpd_http_ports: "{{ httpd_vhosts | rejectattr('http_port', 'undefined') | map(attribute='http_port') | list | unique }}"
+    httpd_https_ports: "{{ httpd_vhosts | rejectattr('https_port', 'undefined') | map(attribute='https_port') | list | unique }}"
+
 - name: Install Apache 2.4 with mod_ssl
   yum:
     name: "{{ item }}"
@@ -17,13 +23,13 @@
   copy:
     remote_src: True
     src: /etc/httpd/conf/httpd.conf
-    dest: /etc/httpd/conf/httpd.conf.{{ ansible_date_time.iso8601_basic_short }}
+    dest: "/etc/httpd/conf/httpd.conf.{{ ansible_date_time.iso8601_basic_short }}"
 
 - name: Backup ssl.conf -> .{{ ansible_date_time.iso8601_basic_short }}
   copy:
     remote_src: True
     src: /etc/httpd/conf.d/ssl.conf
-    dest: /etc/httpd/conf.d/ssl.conf.{{ ansible_date_time.iso8601_basic_short }}
+    dest: "/etc/httpd/conf.d/ssl.conf.{{ ansible_date_time.iso8601_basic_short }}"
 
 - name: Write main configuration
   template:
@@ -52,11 +58,11 @@
   when: httpd_gzip
   notify: Restart Apache
 
-## Event? Extra configs for security etc. ? Vhost?
+# Todo: Event? Extra configs for security etc. ? Vhost?
 
 - name: Create VHost config directory
   file:
-    path: /etc/httpd/{{ httpd_vhosts_conf_folder }}
+    path: "/etc/httpd/{{ httpd_vhosts_conf_folder }}"
     state: directory
     owner: root
     group: root
@@ -64,8 +70,8 @@
 
 - name: Write VHost configurations
   template:
-    src: vhost.conf.j2
-    dest: /etc/httpd/{{ httpd_vhosts_conf_folder }}/{{ item.name }}.conf
+    src: "{{ httpd_vhost_template }}"
+    dest: "/etc/httpd/{{ httpd_vhosts_conf_folder }}/{{ item.filename | default(item.servername) }}.conf"
     owner: root
     group: root
     mode: 0644
@@ -74,7 +80,7 @@
 
 - name: Create VHost DocumentRoot
   file:
-    path: "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.name + '/public_html') }}"
+    path: "{{ item.root | default(httpd_vhosts_web_folder + '/' + item.servername + '/public_html') }}"
     state: directory
     owner: root
     group: root

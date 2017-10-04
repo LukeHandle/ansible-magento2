@@ -5,22 +5,22 @@ phpfpm_install:
   - php70u-fpm
 
 phpfpm_pools:
-  - name: default
-    process_user: php-fpm
-    process_group: php-fpm
-    listen: /var/run/php-fpm/$pool.socket
-    listen_owner: root
-    listen_group: apache
+  - name: "default"
+    process_user: "php-fpm"
+    process_group: "php-fpm"
+    listen: "/var/run/php-fpm/$pool.socket"
+    listen_owner: "root"
+    listen_group: "apache"
     listen_mode: "0660"
-    log_folder: /var/log/php-fpm/
-    access_log: $pool-access.log
+    log_folder: "/var/log/php-fpm/"
+    access_log: "$pool-access.log"
     access_format: '"%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%% %p %P"'
-    slowlog: $pool-slow.log
+    slowlog: "$pool-slow.log"
     slowlog_timeout: 15
     terminate_timeout: 30
     workers_output: "off"
     log_errors: "on"
-    error_log: $pool-error.log
+    error_log: "$pool-error.log"
     display_errors: "off"
     fastcgi_timeout: 60
 

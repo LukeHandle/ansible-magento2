@@ -3,7 +3,7 @@
 - name: Load Magento version specific variables
   include_vars: magento{{ magento_version }}.yml
 
-- name: "Unarchive to {{ magento_root }}"
+- name: Unarchive to {{ magento_root }}
   unarchive:
     src: "{{ magento_archive }}"
     dest: "{{ magento_root }}/"

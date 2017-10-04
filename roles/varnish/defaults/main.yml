@@ -1,13 +1,13 @@
 ---
 
 varnish_listen_address:
-varnish_listen_port: 80
+varnish_listen_port: 6081
 varnish_admin_address: 127.0.0.1
 varnish_admin_port: 6082
-varnish_vcl: /etc/varnish/default.vcl
-varnish_secret: /etc/varnish/secret
-varnish_memory: 256M
+varnish_vcl: "/etc/varnish/default.vcl"
+varnish_secret: "/etc/varnish/secret"
+varnish_memory: "256M"
 
-varnish_backend_ip: 127.0.0.1
+varnish_backend_ip: "127.0.0.1"
 varnish_backend_port: 8080
 varnish_first_byte_timeout: 1800

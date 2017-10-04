@@ -54,7 +54,7 @@
 - name: Write pool configurations
   template:
     src: pool.conf.j2
-    dest: /etc/php-fpm.d/{{ item.name }}.conf
+    dest: "/etc/php-fpm.d/{{ item.name }}.conf"
     owner: root
     group: root
     mode: 0644

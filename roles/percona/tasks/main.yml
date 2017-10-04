@@ -51,7 +51,8 @@
   register: mysql_password_awk
   when: mysql_version == 5.7
 
-- set_fact:
+- name: Set auto-generated root Percona password variable {{ mysql_password_awk.stdout }}
+  set_fact:
     mysql_initial_root_password: "{{ mysql_password_awk.stdout }}"
   when: mysql_version == 5.7
 
