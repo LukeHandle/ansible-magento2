@@ -4,9 +4,12 @@
     # If behind a load balancer/SSL terminator, set HTTPS environment variable (for Application redirects - avoiding loops)
     SetEnvIf X-Forwarded-Proto https HTTPS=on
 #}
+{# Todo: Do I need `output_if_http` and `output_if_https` when we already know which is used from `scheme` #}
 
-{%- macro ssl_conditional(output_if_ssl=false, output_not_ssl=false) %}
-{% if item.https_port is defined %}
+{#- =============================== Internal Macros =============================== #}
+
+{%- macro ssl_conditional(scheme, output_if_http=false, output_if_https=false) %}
+{% if scheme == "https" %}
     SSLEngine On
     SSLCertificateFile {{ item.https_cert | default('/etc/pki/tls/certs/localhost.crt') }}
     SSLCertificateKeyFile {{ item.https_key | default('/etc/pki/tls/private/localhost.key') }}
@@ -14,12 +17,12 @@
     # SSLCertificateChainFile is deprecated in Apache 2.4.8 as `SSLCertificateFile` can now contain the intermediate
     SSLCertificateChainFile {{ item.https_ca }}
 {% endif %}
-{% if output_if_ssl %}
+{% if output_if_https %}
 
-    {{ output_if_ssl }}
+    {{ output_if_https }}
 {% endif %}
-{% elif output_not_ssl %}
-    {{ output_not_ssl }}
+{% elif ( scheme == "http" and output_if_http ) %}
+    {{ output_if_http }}
 {% endif %}
 {% endmacro %}
 
@@ -58,7 +61,7 @@
 
     # ProxyPass will default add `X-Forwarded-For`, `X-Forwarded-Host` and `X-Forwarded-Server`
     ProxyPreserveHost On
-{% if item.https_port %}
+{% if scheme == "https" %}
     RequestHeader set X-Forwarded-Proto https
     RequestHeader set X-Forwarded-Port {{ item.https_port }}
 {% endif %}
@@ -72,9 +75,38 @@
 {% endif %}
 {% endmacro %}
 
-{#- First VHost is only added when we have both HTTP and HTTPS - and thus we redirect to HTTPS) #}
-{% if ( item.http_port is defined and item.https_port is defined ) %}
+{#- =============================== VitualHost Macros =============================== #}
+
+{%- macro vhost_alias(scheme, listen_port) %}
+<VirtualHost {{ item.address | default("*") }}:{{ listen_port }}>
+    ServerName redirect-{{ item.servername }}
+    ServerAlias {{ item.serveralias }}
+{{ logging() }}
+{{ ssl_conditional(scheme, output_if_http="redirect / http://" + item.servername + "/", output_if_https="redirect / https://" + item.servername + "/") -}}
+</VirtualHost>
+{% endmacro %}
+
+
+{%- macro vhost_content(scheme, listen_port) %}
+<VirtualHost {{ item.address | default("*") }}:{{ listen_port }}>
+    ServerName {{ item.servername }}
+{% if ( item.serveralias is defined and not item.alias_redirect ) %}
+    ServerAlias {{ item.serveralias }}
+{% endif %}
+{{ logging() }}
+{{ ssl_conditional(scheme, output_if_http="SetEnvIf X-Forwarded-Proto https HTTPS=on") -}}
+{{ site_content(scheme) -}}
+</VirtualHost>
+{% endmacro %}
+
+{#- =============================== VirtualHost Logic =============================== #}
+
+{#- First VHost is only added when we have both HTTP and HTTPS (and thus we redirect to HTTPS),
+but is ignored when we are using the dual_scheme - where we serve same site_content() ony #}
+
+{% if ( (item.http_port is defined and item.https_port is defined) and not ( item.dual_scheme| default(false) ) ) %}
 # VHost for sending all traffic to HTTPS ServerName
+
 <VirtualHost {{ item.address | default("*") }}:{{ item.http_port }}>
     ServerName {{ item.servername }}
 {% if item.serveralias is defined %}
@@ -91,23 +123,25 @@ It uses the same scheme as the primary VHost (HTTPS when port is specified, othe
 The purpose is to redirect from Alias to Primary #}
 {% if ( item.serveralias is defined and item.alias_redirect ) %}
 # VHost for sending all ServerAlias traffic to (correct scheme) ServerName
-<VirtualHost {{ item.address | default("*") }}:{{ item.https_port | default(item.http_port) }}>
-    ServerName redirect-{{ item.servername }}
-    ServerAlias {{ item.serveralias }}
-{{ logging() }}
-{{ ssl_conditional(output_if_ssl="redirect / https://{{ item.servername }}/", output_not_ssl="redirect / http://{{ item.servername }}/") -}}
-</VirtualHost>
+
+{% if ( item.http_port is defined and ( ( item.dual_scheme| default(false) ) or item.https_port is not defined ) ) %}
+{{ vhost_alias("http", item.http_port) }}
+{% endif %}
+
+{% if ( item.https_port is defined ) %}
+{{ vhost_alias("https", item.https_port) }}
+{% endif %}
 
 {% endif %}
+
 
 {#- Third VHost is always present and prefers HTTPS if the port is specified #}
 # VHost for serving site traffic
-<VirtualHost {{ item.address | default("*") }}:{{ item.https_port | default(item.http_port) }}>
-    ServerName {{ item.servername }}
-{% if ( item.serveralias is defined and not item.alias_redirect ) %}
-    ServerAlias {{ item.serveralias }}
+
+{% if ( item.http_port is defined and ( ( item.dual_scheme| default(false) ) or item.https_port is not defined ) ) %}
+{{ vhost_content("http", item.http_port) }}
 {% endif %}
-{{ logging() }}
-{{ ssl_conditional(output_not_ssl="SetEnvIf X-Forwarded-Proto https HTTPS=on") -}}
-{{ site_content() -}}
-</VirtualHost>
+
+{% if ( item.https_port is defined ) %}
+{{ vhost_content("https", item.https_port) }}
+{% endif %}

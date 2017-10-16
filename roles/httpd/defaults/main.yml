@@ -32,6 +32,7 @@ httpd_vhosts:
     address: "*"
     http_port: 80
     https_port: 443
+    dual_scheme: true # Don't redirect to HTTPS, instead serve same content on both
     servername: "example.com"
     serveralias:  "www.example.com cdn.example.com"
     alias_redirect: true
