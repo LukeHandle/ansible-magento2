@@ -1,8 +1,8 @@
 ---
 
 phpfpm_install:
-  - php70u-cli
-  - php70u-fpm
+  - php71u-cli
+  - php71u-fpm
 
 phpfpm_pools:
   - name: "default"

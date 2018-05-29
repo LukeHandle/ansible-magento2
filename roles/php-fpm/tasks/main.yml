@@ -76,7 +76,7 @@
 
 - name: Configure OpCache
   include: configure_opcache.yml
-  when: "'php70u-opcache' in phpfpm_install"
+  when: "'php71u-opcache' in phpfpm_install"
 
 - name: Set php.ini options
   ini_file:
@@ -94,11 +94,11 @@
     state: latest
   when: php_fpm_composer
   with_items:
-    - php70u-cli
-    - php70u-common
-    - php70u-gd
-    - php70u-intl
-    - php70u-mbstring
-    - php70u-pdo
-    - php70u-process
+    - php71u-cli
+    - php71u-common
+    - php71u-gd
+    - php71u-intl
+    - php71u-mbstring
+    - php71u-pdo
+    - php71u-process
     - composer
