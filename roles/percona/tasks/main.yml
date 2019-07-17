@@ -2,13 +2,13 @@
 
 - name: Install Percona GPG Key
   rpm_key:
-    key: https://www.percona.com/downloads/percona-release/RPM-GPG-KEY-percona
+    key: https://www.percona.com/downloads/RPM-GPG-KEY-percona
     state: present
 
 - name: Install Percona Repository
   yum:
     name:
-    - http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    - https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     state: present
   when: rhn is not defined or
         not rhn
