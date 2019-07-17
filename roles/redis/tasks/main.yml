@@ -2,7 +2,7 @@
 
 - name: Install Redis
   yum:
-    name: redis32u
+    name: redis5
     state: latest
 
 - name: Enable Redis
